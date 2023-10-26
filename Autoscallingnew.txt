@@ -1,0 +1,134 @@
+Autoscalling 
+=================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  selector:
+    matchLabels:
+      run: php-apache
+  template:
+    metadata:
+      labels:
+        run: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: registry.k8s.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    run: php-apache
+spec:
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
+
+...
+
+
+To create a horrizontal pod autoscaller
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+
+To see the list of hpa
+kubectl get hpa
+
+To put load on the php application
+kubectl run -i \
+    --tty load-generator \
+    --rm --image=busybox \
+    --restart=Never \
+    -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+To see the pods autoscalling
+kubectl get hpa php-apache --watch
+
+======================================================================================
+StatefulSet on GCP
+==========================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  clusterIP: None
+  ports:
+    - port: 80
+      name: web
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-statefulset
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  serviceName: nginx
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              name: web
+          volumeMounts:
+            - name: my-volume
+              mountPath: /usr/share/nginx/html
+
+  volumeClaimTemplates:
+    - metadata:
+       name: my-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+
+Install prometheus and grafana
+======================================
+
+Use older version of kubernetes (1.19)
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+
+helm install prometheus prometheus-community/kube-prometheus-stack
+
+grafana by default runs on clusterip to make to accessable externally change to nodeport
+kubectl patch svc prometheus-grafana -p '{"spec": {"type": "NodePort"}}'
+
+Identify the port used by nodeport and opne firewallrules on gcp
+gcloud compute firewall-rules create firewall5  --allow tcp:31764
+
+Username is admin
+password: prom-operator
+
+=============================================================================================
