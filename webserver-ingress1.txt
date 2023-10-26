@@ -1,0 +1,119 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webserver-gke-ing
+spec:
+ rules:
+  -  host: tomcat.example.com
+     http:
+      paths:
+       - path: /
+         pathType: Prefix
+         backend:
+          service:
+           name: tomcat-service
+           port:
+            number: 80
+  -  host: apache.example.com
+     http:
+      paths:
+       - path: /
+         pathType: Prefix
+         backend:
+          service:
+           name: apache-service
+           port:
+            number: 80
+  -  host: nginx.example.com
+     http:
+      paths:
+       - path: /
+         pathType: Prefix
+         backend:
+          service:
+           name: nginx-service
+           port:
+            number: 80
+...
+
+
+PodPending
+Pod stays in a “Pending” state.
+
+The pod is waiting to be scheduled to a node. This can happen for a number of reasons, such as:
+
+There are no available nodes with the required resources(CPU, memory).
+The pod is waiting for its images to be pulled.
+The pod is waiting for its dependencies to be initialized.
+The pod is waiting for a specific node to become available.
+
+
+ImagePullBackOff
+Kubernetes is unable to pull the container image for a pod. This can happen for a number of reasons, such as:
+
+The image repository is not accessible or the image does not exist.
+The image requires authentication and Kubernetes is not configured with the necessary credentials.
+The image is too large to be pulled over the network.
+Network connectivity issues.
+
+Insufficient CPU/Memory
+When you encounter the Insufficient CPU/Memory error in Kubernetes, it means that the pod or container cannot be scheduled because there are not enough CPU or memory resources available in the cluster to meet the specified resource requests. This can happen for a number of reasons, such as:
+
+The pod is over-provisioned.
+The cluster is under-resourced.
+There are too many pods running on the cluster.
+A node is unavailable due to a hardware or software issue.
+
+
+Forbidden
+The user does not have permission to perform the requested operation.
+
+This error is often related to Role-Based Access Control (RBAC) misconfigurations or inadequate permissions. This can happen for a number of reasons, such as:
+
+The user is not authorized to access the Kubernetes cluster.
+The user does not have the necessary role or permissions to perform the operation.
+The resource that the user is trying to access is protected by a role-based access control (RBAC) role or binding.
+
+
+NodeNotReady
+The node is not ready to run pods. This can happen for a number of reasons, such as:
+
+The node is not running the Kubernetes Kubelet service.
+The node is not able to connect to the Kubernetes API server.
+The node has insufficient resources to run pods.
+The node is experiencing a hardware or software issue.
+Solution: Check that the kubelet service is running on the node.
+
+Make sure that the node can connect to the Kubernetes API server.
+
+Verify that the node has sufficient resources to run pods.
+
+If the problem persists, investigate the node for any hardware or software issues.
+
+
+
+
+Exit Code 0	Purposely stopped	
+                Used by developers to indicate that the container was automatically stopped
+Exit Code 1	Application error	
+                Container was stopped due to application error or incorrect reference in the image specification
+Exit Code 125	
+                Container failed to run error	The docker run command did not execute successfully
+Exit Code 126	
+                 Command invoke error	
+                 A command specified in the image specification could not be invoked
+Exit Code 127	File or directory not found	
+                File or directory specified in the image specification was not found
+Exit Code 128	Invalid argument used on exit	Exit was triggered with an invalid exit code (valid codes are integers between 0-255)
+Exit Code 134	Abnormal termination (SIGABRT)	The container aborted itself using the abort() function.
+Exit Code 137	Immediate termination (SIGKILL)	Container was immediately terminated by the operating system via SIGKILL signal
+Exit Code 139	Segmentation fault (SIGSEGV)	Container attempted to access memory that was not assigned to it and was terminated
+Exit Code 143	Graceful termination (SIGTERM)	Container received warning that it was about to be terminated, then terminated
+Exit Code 255	Exit Status Out Of Range	Container exited, returning an exit code outside the acceptable range, meaning the cause of the error is not known
+
+
+
+
+
+
